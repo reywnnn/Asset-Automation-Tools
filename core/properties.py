@@ -1,12 +1,16 @@
-# Copyright © 1996 – 2026 SCS Software s.r.o. All Rights Reserved.
-# Proprietary and confidential. Unauthorized copying, modification,
-# or distribution is strictly prohibited.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2026 Pavel Círus, Jan Dvořáček
+# Copyright (C) 1996-2026 SCS Software s.r.o.
 
 
 
 import bpy
 
-from ..operators.initialize import PRESET_NODE_GROUPS
+from ..operators.initialize import (
+    PRESETS,
+    find_generator_modifier, find_lod_input, set_preset_index,
+)
 
 
 # Filter function that only allows mesh objects linked to the scene
@@ -19,17 +23,21 @@ def lod_level_update(self, context):
     obj = self.input_mesh
     if obj is None:
         return
-    node_group_name = PRESET_NODE_GROUPS.get(self.preset)
-    if node_group_name is None:
+    mod = find_generator_modifier(obj)
+    if mod is None:
         return
-    for mod in obj.modifiers:
-        if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-            for item in mod.node_group.interface.items_tree:
-                if item.item_type == 'SOCKET' and item.name == "Level of Detail:":
-                    mod[item.identifier] = self.lod_level
-                    obj.update_tag()
-                    break
-            break
+    lod_input = find_lod_input(mod, self.preset)
+    if lod_input:
+        lod_input.default_value = self.lod_level
+        obj.update_tag()
+
+
+# Switches the active preset on the Index Switch node when the user changes selection
+def preset_update(self, context):
+    obj = self.input_mesh
+    if obj is None:
+        return
+    set_preset_index(obj, self.preset)
 
 
 # Syncs modifier socket value back to lod_level property on depsgraph updates
@@ -38,18 +46,14 @@ def on_depsgraph_update(scene, depsgraph):
     obj = sat.input_mesh
     if obj is None:
         return
-    node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
-    if node_group_name is None:
+    mod = find_generator_modifier(obj)
+    if mod is None:
         return
-    for mod in obj.modifiers:
-        if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-            for item in mod.node_group.interface.items_tree:
-                if item.item_type == 'SOCKET' and item.name == "Level of Detail:":
-                    val = mod.get(item.identifier, 0)
-                    if sat.lod_level != val:
-                        sat["lod_level"] = val
-                    break
-            break
+    lod_input = find_lod_input(mod, sat.preset)
+    if lod_input:
+        val = int(lod_input.default_value)
+        if sat.lod_level != val:
+            sat["lod_level"] = val
 
 
 # Stores all addon properties accessible via context.scene.sat
@@ -66,9 +70,9 @@ class SAT_PROPERTIES(bpy.types.PropertyGroup):
         description="Select a Generator Preset",
         items=[
             ('NONE', "None", "No preset selected"),
-            ('HARDSURFACE', "Hardsurface", "LOD, Shadow & Collision for Hardsurface Assets"),
-        ],
+        ] + [(key, val[1], val[2]) for key, val in PRESETS.items()],
         default='NONE',
+        update=preset_update,
     ) # type: ignore
 
     lod_level: bpy.props.IntProperty(
@@ -76,6 +80,6 @@ class SAT_PROPERTIES(bpy.types.PropertyGroup):
         description="Move slider to change Level of Detail",
         default=0,
         min=0,
-        max=1,
+        max=2,
         update=lod_level_update,
     ) # type: ignore

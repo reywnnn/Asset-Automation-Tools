@@ -1,12 +1,13 @@
-# Copyright © 1996 – 2026 SCS Software s.r.o. All Rights Reserved.
-# Proprietary and confidential. Unauthorized copying, modification,
-# or distribution is strictly prohibited.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2026 Pavel Círus, Jan Dvořáček
+# Copyright (C) 1996-2026 SCS Software s.r.o.
 
 
 
 import bpy
 
-from .initialize import PRESET_NODE_GROUPS
+from .initialize import find_generator_modifier
 
 
 # Operator that bakes the output mesh from the generator modifier into a new collection
@@ -21,12 +22,10 @@ class SAT_OT_BAKE(bpy.types.Operator):
         sat = context.scene.sat
         if sat.input_mesh is None:
             return "Select an input mesh first"
-        node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
-        if node_group_name is None:
+        if sat.preset == 'NONE':
             return "Select a preset first"
-        for mod in sat.input_mesh.modifiers:
-            if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-                return "Bake the generator output into a new mesh in the Output collection"
+        if find_generator_modifier(sat.input_mesh):
+            return "Bake the generator output into a new mesh in the Output collection"
         return "Initialize the generator first"
 
     @classmethod
@@ -34,13 +33,9 @@ class SAT_OT_BAKE(bpy.types.Operator):
         sat = context.scene.sat
         if sat.input_mesh is None:
             return False
-        node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
-        if node_group_name is None:
+        if sat.preset == 'NONE':
             return False
-        for mod in sat.input_mesh.modifiers:
-            if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-                return True
-        return False
+        return find_generator_modifier(sat.input_mesh) is not None
 
     def execute(self, context):
         sat = context.scene.sat

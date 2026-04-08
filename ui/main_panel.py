@@ -1,12 +1,13 @@
-# Copyright © 1996 – 2026 SCS Software s.r.o. All Rights Reserved.
-# Proprietary and confidential. Unauthorized copying, modification,
-# or distribution is strictly prohibited.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2026 Pavel Círus, Jan Dvořáček
+# Copyright (C) 1996-2026 SCS Software s.r.o.
 
 
 
 import bpy
 
-from ..operators.initialize import PRESET_NODE_GROUPS
+from ..operators.initialize import find_generator_modifier, find_lod_input
 
 SCALE_Y = 1.2
 
@@ -64,20 +65,14 @@ class SAT_PT_MAIN(bpy.types.Panel):
 
         # Show LOD slider and Bake button when generator modifier is applied
         if sat.input_mesh and sat.preset != 'NONE':
-            node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
-            if node_group_name:
-                for mod in sat.input_mesh.modifiers:
-                    if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-                        for item in mod.node_group.interface.items_tree:
-                            if item.item_type == 'SOCKET' and item.name == "Level of Detail:":
-                                box = layout.box()
-                                row = box.row(align=True)
-                                row.scale_y = SCALE_Y
-                                row.label(text="Level of Detail:")
-                                sub = row.row(align=True)
-                                sub.prop(sat, "lod_level", text="")
-                                row = box.row(align=True)
-                                row.scale_y = SCALE_Y
-                                row.operator("sat.bake", icon='OBJECT_DATA')
-                                break
-                        break
+            mod = find_generator_modifier(sat.input_mesh)
+            if mod and find_lod_input(mod, sat.preset):
+                box = layout.box()
+                row = box.row(align=True)
+                row.scale_y = SCALE_Y
+                row.label(text="Level of Detail:")
+                sub = row.row(align=True)
+                sub.prop(sat, "lod_level", text="")
+                row = box.row(align=True)
+                row.scale_y = SCALE_Y
+                row.operator("sat.bake", icon='OBJECT_DATA')

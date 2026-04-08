@@ -1,12 +1,13 @@
-# Copyright © 1996 – 2026 SCS Software s.r.o. All Rights Reserved.
-# Proprietary and confidential. Unauthorized copying, modification,
-# or distribution is strictly prohibited.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2026 Pavel Círus, Jan Dvořáček
+# Copyright (C) 1996-2026 SCS Software s.r.o.
 
 
 
 import bpy
 
-from .initialize import PRESET_NODE_GROUPS
+from .initialize import MODIFIER_NAME, find_generator_modifier
 
 
 # Operator that removes the Geometry Nodes preset modifier from the input mesh
@@ -22,11 +23,9 @@ class SAT_OT_CLEAR(bpy.types.Operator):
         sat = context.scene.sat
         if sat.input_mesh is None:
             return "Select an input mesh first"
-        node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
-        if node_group_name:
-            for mod in sat.input_mesh.modifiers:
-                if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-                    return f"Remove '{node_group_name}' from '{sat.input_mesh.name}'"
+        mod = find_generator_modifier(sat.input_mesh)
+        if mod:
+            return f"Remove '{MODIFIER_NAME}' from '{sat.input_mesh.name}'"
         return "No generator to remove"
 
     # Disables the button if no mesh is selected or preset is not applied
@@ -35,25 +34,18 @@ class SAT_OT_CLEAR(bpy.types.Operator):
         sat = context.scene.sat
         if sat.input_mesh is None:
             return False
-        node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
-        if node_group_name is None:
-            return False
-        for mod in sat.input_mesh.modifiers:
-            if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-                return True
-        return False
+        return find_generator_modifier(sat.input_mesh) is not None
 
     # Removes the matching Geometry Nodes modifier from the input mesh
     def execute(self, context):
         sat = context.scene.sat
         obj = sat.input_mesh
-        node_group_name = PRESET_NODE_GROUPS.get(sat.preset)
+        mod = find_generator_modifier(obj)
 
-        for mod in obj.modifiers:
-            if mod.type == 'NODES' and mod.node_group and mod.node_group.name == node_group_name:
-                obj.modifiers.remove(mod)
-                self.report({'INFO'}, f"Removed '{node_group_name}' from '{obj.name}'")
-                return {'FINISHED'}
+        if mod:
+            obj.modifiers.remove(mod)
+            self.report({'INFO'}, f"Removed '{MODIFIER_NAME}' from '{obj.name}'")
+            return {'FINISHED'}
 
         self.report({'WARNING'}, "No matching generator found")
         return {'CANCELLED'}

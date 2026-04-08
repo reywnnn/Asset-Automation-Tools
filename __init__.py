@@ -1,6 +1,7 @@
-# Copyright © 1996 – 2026 SCS Software s.r.o. All Rights Reserved.
-# Proprietary and confidential. Unauthorized copying, modification,
-# or distribution is strictly prohibited.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2026 Pavel Círus, Jan Dvořáček
+# Copyright (C) 1996-2026 SCS Software s.r.o.
 
 
 
@@ -35,7 +36,10 @@ def register():
  
 # Unregisters all classes and removes scene properties
 def unregister():
-    bpy.app.handlers.depsgraph_update_post.remove(on_depsgraph_update)
+    for handler in list(bpy.app.handlers.depsgraph_update_post):
+        if handler.__name__ == "on_depsgraph_update":
+            bpy.app.handlers.depsgraph_update_post.remove(handler)
+            break
     del bpy.types.Scene.sat
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
