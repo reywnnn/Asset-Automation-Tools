@@ -7,7 +7,7 @@
 
 import bpy
 
-from ..operators.initialize import find_generator_modifier, find_lod_input
+from ..core.generator import find_generator_modifier, find_lod_input
 
 SCALE_Y = 1.2
 

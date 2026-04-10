@@ -7,7 +7,7 @@
 
 import bpy
 
-from ..operators.initialize import (
+from .generator import (
     PRESETS,
     find_generator_modifier, find_lod_input, set_preset_index,
 )

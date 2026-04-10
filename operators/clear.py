@@ -7,7 +7,7 @@
 
 import bpy
 
-from .initialize import MODIFIER_NAME, find_generator_modifier
+from ..core.generator import MODIFIER_NAME, find_generator_modifier
 
 
 # Operator that removes the Geometry Nodes preset modifier from the input mesh

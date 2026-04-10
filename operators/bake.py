@@ -7,7 +7,7 @@
 
 import bpy
 
-from .initialize import find_generator_modifier
+from ..core.generator import find_generator_modifier
 
 
 # Operator that bakes the output mesh from the generator modifier into a new collection

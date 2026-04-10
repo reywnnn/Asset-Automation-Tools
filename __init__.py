@@ -11,7 +11,7 @@ from .core.properties import SAT_PROPERTIES, on_depsgraph_update
 from .operators.bake import SAT_OT_BAKE
 from .operators.clear import SAT_OT_CLEAR
 from .operators.initialize import SAT_OT_INITIALIZE
-from .operators.open_url import SAT_OT_OPEN_URL
+from .operators.misc.open_url import SAT_OT_OPEN_URL
 from .ui.main_panel import SAT_PT_MAIN
  
  
