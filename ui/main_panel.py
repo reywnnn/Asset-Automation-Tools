@@ -7,7 +7,9 @@
 
 import bpy
 
-from ..core.generator import find_generator_modifier, find_lod_input
+from ..core.generator import find_generator_modifier, find_lod_input, find_menu_switch_input
+
+
 
 SCALE_Y = 1.2
 
@@ -20,7 +22,7 @@ class SAT_PT_MAIN(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "SCS Asset Toolkit"
 
-    # Draws the panel UI with links, input mesh selector, preset and initialize button
+    # Draws the UI and its function elements
     def draw(self, context):
         layout = self.layout
 
@@ -51,6 +53,14 @@ class SAT_PT_MAIN(bpy.types.Panel):
         row.prop(context.scene.sat, "preset", text="")
 
         sat = context.scene.sat
+
+        if sat.input_mesh and sat.preset != 'NONE':
+            mod = find_generator_modifier(sat.input_mesh)
+            if mod and find_menu_switch_input(mod, sat.preset):
+                row = box.row(align=True)
+                row.label(text="Preview:")
+                row.prop(sat, "geometry_type", text="")
+
         if sat.input_mesh is None:
             box.label(text="Select an Input Mesh to continue.", icon='INFO')
         if sat.preset == 'NONE':
@@ -63,7 +73,6 @@ class SAT_PT_MAIN(bpy.types.Panel):
         row.scale_y = SCALE_Y
         row.operator("sat.clear", icon='TRASH')
 
-        # Show LOD slider and Bake button when generator modifier is applied
         if sat.input_mesh and sat.preset != 'NONE':
             mod = find_generator_modifier(sat.input_mesh)
             if mod and find_lod_input(mod, sat.preset):
@@ -73,6 +82,7 @@ class SAT_PT_MAIN(bpy.types.Panel):
                 row.label(text="Level of Detail:")
                 sub = row.row(align=True)
                 sub.prop(sat, "lod_level", text="")
+
                 row = box.row(align=True)
                 row.scale_y = SCALE_Y
                 row.operator("sat.bake", icon='OBJECT_DATA')

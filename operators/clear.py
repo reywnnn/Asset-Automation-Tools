@@ -10,6 +10,7 @@ import bpy
 from ..core.generator import MODIFIER_NAME, find_generator_modifier
 
 
+
 # Operator that removes the Geometry Nodes preset modifier from the input mesh
 class SAT_OT_CLEAR(bpy.types.Operator):
     bl_idname = "sat.clear"

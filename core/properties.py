@@ -8,9 +8,11 @@
 import bpy
 
 from .generator import (
-    PRESETS,
-    find_generator_modifier, find_lod_input, set_preset_index,
+    GEOMETRY_TYPES, PRESETS,
+    find_generator_modifier, find_lod_input, find_menu_switch_input,
+    set_preset_index,
 )
+
 
 
 # Filter function that only allows mesh objects linked to the scene
@@ -30,6 +32,22 @@ def lod_level_update(self, context):
     if lod_input:
         lod_input.default_value = self.lod_level
         obj.update_tag()
+
+
+# Syncs geometry_type property to the Menu Switch input on the preset sub-node
+def geometry_type_update(self, context):
+    obj = self.input_mesh
+    if obj is None:
+        return
+    mod = find_generator_modifier(obj)
+    if mod is None:
+        return
+    menu_input = find_menu_switch_input(mod, self.preset)
+    if menu_input:
+        type_info = GEOMETRY_TYPES.get(self.geometry_type)
+        if type_info:
+            menu_input.default_value = type_info[0]
+            obj.update_tag()
 
 
 # Switches the active preset on the Index Switch node when the user changes selection
@@ -82,4 +100,16 @@ class SAT_PROPERTIES(bpy.types.PropertyGroup):
         min=0,
         max=2,
         update=lod_level_update,
+    ) # type: ignore
+
+    geometry_type: bpy.props.EnumProperty(
+        name="Geometry Type",
+        description="Preview geometry output type in viewport",
+        items=[
+            ('VISUAL',      "Visual",       "Preview Visual geometry"),
+            ('SHADOW',      "Shadow",       "Preview Shadow geometry"),
+            ('COLLISION',   "Collision",    "Preview Collision geometry"),
+        ],
+        default='VISUAL',
+        update=geometry_type_update,
     ) # type: ignore

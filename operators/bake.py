@@ -7,16 +7,21 @@
 
 import bpy
 
-from ..core.generator import find_generator_modifier
+from ..core.generator import (
+    GEOMETRY_TYPES, LOD_BAKE_MAP,
+    find_generator_modifier, find_menu_switch_input,
+)
 
 
-# Operator that bakes the output mesh from the generator modifier into a new collection
+
+# Operator that bakes all geometry outputs for the selected LOD into named collections.
 class SAT_OT_BAKE(bpy.types.Operator):
     bl_idname = "sat.bake"
     bl_label = "Bake Asset"
-    bl_description = "Bake the generator output into a new mesh in the Output collection"
+    bl_description = "Bake all geometry outputs for the selected LOD into named collections"
     bl_options = {'REGISTER', 'UNDO'}
 
+    # Returns a dynamic tooltip explaining why the button may be disabled
     @classmethod
     def description(cls, context, properties):
         sat = context.scene.sat
@@ -25,9 +30,10 @@ class SAT_OT_BAKE(bpy.types.Operator):
         if sat.preset == 'NONE':
             return "Select a preset first"
         if find_generator_modifier(sat.input_mesh):
-            return "Bake the generator output into a new mesh in the Output collection"
+            return "Bake all geometry outputs for the selected LOD"
         return "Initialize the generator first"
 
+    # Disables the button if no mesh is selected, preset is not selected, or preset is not applied
     @classmethod
     def poll(cls, context):
         sat = context.scene.sat
@@ -37,28 +43,68 @@ class SAT_OT_BAKE(bpy.types.Operator):
             return False
         return find_generator_modifier(sat.input_mesh) is not None
 
+    # Executes the bake process, iterates through geometry types for the selected LOD
     def execute(self, context):
         sat = context.scene.sat
         obj = sat.input_mesh
+        lod = sat.lod_level
+        mod = find_generator_modifier(obj)
 
-        # Evaluate the mesh with all modifiers applied
-        depsgraph = context.evaluated_depsgraph_get()
-        eval_obj = obj.evaluated_get(depsgraph)
-        mesh = bpy.data.meshes.new_from_object(eval_obj)
+        menu_input = find_menu_switch_input(mod, sat.preset)
+        if menu_input is None:
+            self.report({'ERROR'}, "Menu Switch input not found on preset node")
+            return {'CANCELLED'}
 
-        baked_obj = bpy.data.objects.new(f"{obj.name}_vis_lod{sat.lod_level}", mesh)
+        original_menu_value = menu_input.default_value
 
-        # Create Output collection hierarchy with color tags
         output_col = self._get_or_create_collection("Output", context.scene.collection)
-        visual_col = self._get_or_create_collection("Visual", output_col, 'COLOR_02')
-        self._get_or_create_collection("Shadow", output_col, 'COLOR_05')
-        self._get_or_create_collection("Collision", output_col, 'COLOR_04')
 
-        visual_col.objects.link(baked_obj)
+        types_to_bake = LOD_BAKE_MAP.get(lod, [])
+        baked_names = []
 
-        self.report({'INFO'}, f"Baked '{obj.name}' into Output / Visual")
-        return {'FINISHED'}
+        for type_key in types_to_bake:
+            menu_value, suffix, col_name, color_tag = GEOMETRY_TYPES[type_key]
 
+            menu_input.default_value = menu_value
+            obj.update_tag()
+            context.view_layer.update()
+
+            depsgraph = context.evaluated_depsgraph_get()
+            eval_obj = obj.evaluated_get(depsgraph)
+            mesh = bpy.data.meshes.new_from_object(eval_obj)
+
+            if mesh is None or len(mesh.vertices) == 0:
+                if mesh:
+                    bpy.data.meshes.remove(mesh)
+                continue
+            
+            expected_attr = f"lod_{lod}_{suffix}"
+            if expected_attr not in mesh.attributes:
+                bpy.data.meshes.remove(mesh)
+                self.report({'WARNING'}, f"Attribute '{expected_attr}' not found, skipping")
+                continue
+
+            baked_name = f"{obj.name}_{lod}_{suffix}"
+            baked_obj = bpy.data.objects.new(baked_name, mesh)
+            baked_obj.matrix_world = obj.matrix_world.copy()
+
+            target_col = self._get_or_create_collection(col_name, output_col, color_tag)
+            target_col.objects.link(baked_obj)
+
+            baked_names.append(baked_name)
+
+        menu_input.default_value = original_menu_value
+        obj.update_tag()
+        context.view_layer.update()
+
+        if baked_names:
+            self.report({'INFO'}, f"Baked LOD {lod}: {', '.join(baked_names)}")
+        else:
+            self.report({'WARNING'}, "No geometry was baked")
+
+        return {'FINISHED'} if baked_names else {'CANCELLED'}
+
+    # Helper method to get or create a collection with the specified name under the given parent collection
     def _get_or_create_collection(self, name, parent, color_tag=None):
         for child in parent.children:
             if child.name == name:

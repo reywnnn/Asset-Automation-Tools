@@ -8,34 +8,49 @@
 import os
 
 
-# Path to the .blend file containing Geometry Nodes presets
+
 ASSET_BLEND_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "assets", "scs_asset_toolkit.blend",
 )
 
-# Name of the modifier applied to the object
+
 MODIFIER_NAME = "Generator"
 
-# Node tree datablock loaded from the asset file and assigned to the modifier
+
 NODE_GROUP_NAME = "Presets"
 
-# Preset definitions: 'ENUM_ID': (switch_index, "UI Label", "Description", "Sub-node name")
-# switch_index corresponds to the Index Switch node inside the Presets node tree
+
+# Format: (index, display_name, description, node_tree_name)
 PRESETS = {
-    'HARDSURFACE':  (0, "Hardsurface", "LOD, Shadow & Collision for Hardsurface Assets", "Preset: Hardsurface"),
-    'ORGANIC':  (1, "Organic", "LOD, Shadow & Collision for Organic Assets", "Preset: Organic"),
+    'HARDSURFACE':  (0, "Hardsurface",  "LOD, Shadow & Collision for Hardsurface Assets",   "Preset: Hardsurface"),
+    'ORGANIC':      (1, "Organic",      "LOD, Shadow & Collision for Organic Assets",       "Preset: Organic"),
 }
 
 
-# Return the Index Switch value for a preset, or None.
+# Format: (display_name, suffix, socket_name, color_tag)
+GEOMETRY_TYPES = {
+    'VISUAL':    ("Visual",    "vis",  "Visual",    'COLOR_02'),
+    'SHADOW':    ("Shadow",    "shw",  "Shadow",    'COLOR_05'),
+    'COLLISION': ("Collision", "coll", "Collision", 'COLOR_04'),
+}
+
+
+# Maps each LOD level to the geometry types that should be baked for it.
+LOD_BAKE_MAP = {
+    0: ['VISUAL', 'SHADOW', 'COLLISION'],
+    1: ['VISUAL', 'SHADOW'],
+    2: ['VISUAL', 'SHADOW'],
+}
+
+
+# Returns preset index (first value) from PRESETS dict by key, or None if not found
 def get_preset_index(preset_key):
     entry = PRESETS.get(preset_key)
     return entry[0] if entry else None
 
 
-# Set the Index Switch node value in the Presets node tree.
-# When preset is NONE, disables the modifier in viewport.
+# Sets preset index on Geometry Nodes modifier (Index Switch), or disables modifier if preset is invalid
 def set_preset_index(obj, preset_key):
     mod = find_generator_modifier(obj)
     if mod is None:
@@ -55,7 +70,7 @@ def set_preset_index(obj, preset_key):
             return
 
 
-# Return the Generator modifier on obj, or None.
+# Finds and returns the Geometry Nodes modifier with the specified node group, or None if not found
 def find_generator_modifier(obj):
     if obj is None:
         return None
@@ -65,7 +80,7 @@ def find_generator_modifier(obj):
     return None
 
 
-# Find the 'Level of Detail:' input on the preset sub-node within Presets.
+# Finds and returns the LOD level input socket in the Geometry Nodes modifier for the specified preset, or None if not found
 def find_lod_input(mod, preset_key):
     entry = PRESETS.get(preset_key)
     if entry is None or mod is None or mod.node_group is None:
@@ -76,4 +91,18 @@ def find_lod_input(mod, preset_key):
             for inp in node.inputs:
                 if inp.name == "Level of Detail:":
                     return inp
+    return None
+
+
+# Finds and returns the menu switch input socket in the Geometry Nodes modifier for the specified preset, or None if not found
+def find_menu_switch_input(mod, preset_key):
+    entry = PRESETS.get(preset_key)
+    if entry is None or mod is None or mod.node_group is None:
+        return None
+    node_tree_name = entry[3]
+    for node in mod.node_group.nodes:
+        if node.type == 'GROUP' and node.node_tree and node.node_tree.name == node_tree_name:
+            for inner_node in node.node_tree.nodes:
+                if inner_node.bl_idname == 'GeometryNodeMenuSwitch':
+                    return inner_node.inputs[0]
     return None

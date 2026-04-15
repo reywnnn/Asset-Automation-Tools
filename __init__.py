@@ -15,6 +15,7 @@ from .operators.misc.open_url import SAT_OT_OPEN_URL
 from .ui.main_panel import SAT_PT_MAIN
  
  
+ 
 # All classes that need to be registered in Blender
 classes = (
     SAT_PROPERTIES,

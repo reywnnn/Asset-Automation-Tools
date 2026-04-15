@@ -8,7 +8,7 @@
 schema_version = "1.0.0"
 
 id = "scs_asset_toolkit"
-version = "0.0.3"
+version = "0.0.4"
 name = "SCS Asset Toolkit"
 tagline = "LOD, Shadow & Collision generation toolkit for assets"
 maintainer = """\

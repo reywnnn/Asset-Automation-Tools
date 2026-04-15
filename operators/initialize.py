@@ -13,6 +13,7 @@ from ..core.generator import (
 )
 
 
+
 # Operator that loads and applies a Geometry Nodes preset to the input mesh
 class SAT_OT_INITIALIZE(bpy.types.Operator):
     bl_idname = "sat.initialize"
