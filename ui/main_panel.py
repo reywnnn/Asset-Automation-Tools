@@ -11,9 +11,6 @@ from ..core.generator import find_generator_modifier, find_lod_input, find_menu_
 
 
 
-SCALE_Y = 1.2
-
-
 # Main sidebar panel in the 3D Viewport for the SCS Asset Toolkit
 class SAT_PT_MAIN(bpy.types.Panel):
     bl_label = "SCS Asset Toolkit"
@@ -25,6 +22,8 @@ class SAT_PT_MAIN(bpy.types.Panel):
     # Draws the UI and its function elements
     def draw(self, context):
         layout = self.layout
+
+        SCALE_Y = 1.2
 
         box = layout.box()
         row = box.row(align=True)
