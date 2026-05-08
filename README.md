@@ -4,7 +4,7 @@ Blender add-on for automated game asset optimization.
 
 **SCS Asset Toolkit** is a procedural toolkit built for Blender that automates creation of:
 
-- Level of Detail meshes
+- **Level of Detail Meshes**
 - **Shadow Meshes**
 - **Collision Meshes**
 - Validation / debug checks before generation
