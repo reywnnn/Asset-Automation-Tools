@@ -13,6 +13,8 @@ The goal is simple:
 
 > **Turn high-quality source meshes into optimized in-game assets with minimal manual work, while preserving shading, topology integrity, and asset-specific requirements.**
 
+Author: **Pavel Círus**
+
 ---
 
 ## Features
