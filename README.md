@@ -20,10 +20,7 @@ The goal is simple:
 ### Automated LOD Generation
 Generate multiple optimization levels directly from a source mesh:
 
-- LOD1
-- LOD2
-- LOD3
-- LOD4
+![Demo](docs/preview_1.gif)
 
 ---
 
@@ -109,6 +106,8 @@ Built with:
 - automated background processing
 
 The user only interacts with a clean UI layer (technical complexity stays under the hood).
+
+![Demo](docs/preview_2.gif)
 
 ---
 
