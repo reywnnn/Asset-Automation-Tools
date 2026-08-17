@@ -33,4 +33,5 @@ paths_exclude_pattern = [
     ".build_number",
     "*.code-workspace",
     ".vscode/",
+    "*.md",
 ]
