@@ -9,13 +9,13 @@ from ..core.generator import find_generator_modifier, find_lod_input, find_menu_
 
 
 
-# Main sidebar panel in the 3D Viewport for the SCS Asset Toolkit
-class SAT_PT_MAIN(bpy.types.Panel):
-    bl_label = "SCS Asset Toolkit"
-    bl_idname = "SAT_PT_MAIN"
+# Main sidebar panel in the 3D Viewport for the Asset Automation Tools
+class AAT_PT_MAIN(bpy.types.Panel):
+    bl_label = "Asset Automation Tools"
+    bl_idname = "AAT_PT_MAIN"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "SCS Asset Toolkit"
+    bl_category = "Asset Automation Tools"
 
     # Draws the UI and its function elements
     def draw(self, context):
@@ -26,14 +26,14 @@ class SAT_PT_MAIN(bpy.types.Panel):
         box = layout.box()
         row = box.row(align=True)
         row.scale_y = SCALE_Y
-        op = row.operator("sat.open_url", text="Docs", icon='HELP')
+        op = row.operator("aat.open_url", text="Docs", icon='HELP')
         op.url = (
             "https://scssoft.atlassian.net/wiki/spaces/"
             "~712020097edec4c2844607944fbd1e723e72ab/"
             "pages/2002845757/Documentation"
         )
-        op.tooltip = "Open the SCS Asset Toolkit documentation"
-        op = row.operator("sat.open_url", text="Report", icon='CURRENT_FILE')
+        op.tooltip = "Open the Asset Automation Tools documentation"
+        op = row.operator("aat.open_url", text="Report", icon='CURRENT_FILE')
         op.url = (
             "https://miro.com/app/board/uXjVGu_mvoU=/"
             "?moveToWidget=3458764664537798733&cot=10"
@@ -43,43 +43,43 @@ class SAT_PT_MAIN(bpy.types.Panel):
         box = layout.box()
         row = box.row(align=True)
         row.label(text="Input Mesh:")
-        row.prop(context.scene.sat, "input_mesh", text="")
+        row.prop(context.scene.aat, "input_mesh", text="")
 
         row = box.row(align=True)
         row.label(text="Preset:")
-        row.prop(context.scene.sat, "preset", text="")
+        row.prop(context.scene.aat, "preset", text="")
 
-        sat = context.scene.sat
+        aat = context.scene.aat
 
-        if sat.input_mesh and sat.preset != 'NONE':
-            mod = find_generator_modifier(sat.input_mesh)
-            if mod and find_menu_switch_input(mod, sat.preset):
+        if aat.input_mesh and aat.preset != 'NONE':
+            mod = find_generator_modifier(aat.input_mesh)
+            if mod and find_menu_switch_input(mod, aat.preset):
                 row = box.row(align=True)
                 row.label(text="Preview:")
-                row.prop(sat, "geometry_type", text="")
+                row.prop(aat, "geometry_type", text="")
 
-        if sat.input_mesh is None:
+        if aat.input_mesh is None:
             box.label(text="Select an Input Mesh to continue.", icon='INFO')
-        if sat.preset == 'NONE':
+        if aat.preset == 'NONE':
             box.label(text="Select a Preset to continue.", icon='INFO')
 
         row = box.row(align=True)
         row.scale_y = SCALE_Y
-        row.operator("sat.initialize", icon='MODIFIER')
+        row.operator("aat.initialize", icon='MODIFIER')
         row = box.row(align=True)
         row.scale_y = SCALE_Y
-        row.operator("sat.clear", icon='TRASH')
+        row.operator("aat.clear", icon='TRASH')
 
-        if sat.input_mesh and sat.preset != 'NONE':
-            mod = find_generator_modifier(sat.input_mesh)
-            if mod and find_lod_input(mod, sat.preset):
+        if aat.input_mesh and aat.preset != 'NONE':
+            mod = find_generator_modifier(aat.input_mesh)
+            if mod and find_lod_input(mod, aat.preset):
                 box = layout.box()
                 row = box.row(align=True)
                 row.scale_y = SCALE_Y
                 row.label(text="Level of Detail:")
                 sub = row.row(align=True)
-                sub.prop(sat, "lod_level", text="")
+                sub.prop(aat, "lod_level", text="")
 
                 row = box.row(align=True)
                 row.scale_y = SCALE_Y
-                row.operator("sat.bake", icon='OBJECT_DATA')
+                row.operator("aat.bake", icon='OBJECT_DATA')

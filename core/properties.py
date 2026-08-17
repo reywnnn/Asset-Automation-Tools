@@ -58,22 +58,22 @@ def preset_update(self, context):
 
 # Syncs modifier socket value back to lod_level property on depsgraph updates
 def on_depsgraph_update(scene, depsgraph):
-    sat = scene.sat
-    obj = sat.input_mesh
+    aat = scene.aat
+    obj = aat.input_mesh
     if obj is None:
         return
     mod = find_generator_modifier(obj)
     if mod is None:
         return
-    lod_input = find_lod_input(mod, sat.preset)
+    lod_input = find_lod_input(mod, aat.preset)
     if lod_input:
         val = int(lod_input.default_value)
-        if sat.lod_level != val:
-            sat["lod_level"] = val
+        if aat.lod_level != val:
+            aat["lod_level"] = val
 
 
-# Stores all addon properties accessible via context.scene.sat
-class SAT_PROPERTIES(bpy.types.PropertyGroup):
+# Stores all addon properties accessible via context.scene.aat
+class AAT_PROPERTIES(bpy.types.PropertyGroup):
     input_mesh: bpy.props.PointerProperty(
         type=bpy.types.Object,
         name="Input Mesh",

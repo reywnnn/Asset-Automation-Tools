@@ -9,7 +9,7 @@ import os
 
 ASSET_BLEND_PATH = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
-    "assets", "scs_asset_toolkit.blend",
+    "assets", "asset_automation_tools.blend",
 )
 
 

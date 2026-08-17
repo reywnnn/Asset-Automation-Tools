@@ -13,8 +13,8 @@ from ..core.generator import (
 
 
 # Operator that loads and applies a Geometry Nodes preset to the input mesh
-class SAT_OT_INITIALIZE(bpy.types.Operator):
-    bl_idname = "sat.initialize"
+class AAT_OT_INITIALIZE(bpy.types.Operator):
+    bl_idname = "aat.initialize"
     bl_label = "Initialize Generator"
     bl_description = "Apply generator from selected preset to the input mesh"
     bl_options = {'REGISTER', 'UNDO'}
@@ -22,29 +22,29 @@ class SAT_OT_INITIALIZE(bpy.types.Operator):
     # Returns a dynamic tooltip explaining why the button may be disabled
     @classmethod
     def description(cls, context, properties):
-        sat = context.scene.sat
-        if sat.input_mesh is None:
+        aat = context.scene.aat
+        if aat.input_mesh is None:
             return "Select an input mesh first"
-        if find_generator_modifier(sat.input_mesh):
+        if find_generator_modifier(aat.input_mesh):
             return "Generator is already applied on your input mesh"
         return "Apply generator from selected preset to the input mesh"
 
     # Disables the button if no mesh is selected or preset is already applied
     @classmethod
     def poll(cls, context):
-        sat = context.scene.sat
-        if sat.input_mesh is None:
+        aat = context.scene.aat
+        if aat.input_mesh is None:
             return False
-        if sat.preset == 'NONE':
+        if aat.preset == 'NONE':
             return False
-        if find_generator_modifier(sat.input_mesh):
+        if find_generator_modifier(aat.input_mesh):
             return False
         return True
 
     # Loads the node group from the .blend asset file and adds it as a modifier
     def execute(self, context):
-        sat = context.scene.sat
-        obj = sat.input_mesh
+        aat = context.scene.aat
+        obj = aat.input_mesh
 
         if NODE_GROUP_NAME not in bpy.data.node_groups:
             with bpy.data.libraries.load(ASSET_BLEND_PATH) as (data_from, data_to):
@@ -59,7 +59,7 @@ class SAT_OT_INITIALIZE(bpy.types.Operator):
         modifier = obj.modifiers.new(name=MODIFIER_NAME, type='NODES')
         modifier.node_group = node_group
 
-        set_preset_index(obj, sat.preset)
+        set_preset_index(obj, aat.preset)
 
         self.report({'INFO'}, f"Applied '{MODIFIER_NAME}' to '{obj.name}'")
         return {'FINISHED'}

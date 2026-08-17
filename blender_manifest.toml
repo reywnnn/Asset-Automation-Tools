@@ -5,14 +5,11 @@
 
 schema_version = "1.0.0"
 
-id = "scs_asset_toolkit"
-version = "0.0.4"
-name = "SCS Asset Toolkit"
+id = "asset_automation_tools"
+version = "0.0.5"
+name = "Asset Automation Tools"
 tagline = "LOD, Shadow & Collision generation toolkit for assets"
-maintainer = """\
-    Pavel Círus (Paul) <pavel.cirus@scssoft.com>, \
-    Jan Dvořáček <jan.dvoracek@scssoft.com>\
-    """
+maintainer = """Pavel Círus (Paul) <pavel.cirus@scssoft.com>"""
 
 type = "add-on"
 

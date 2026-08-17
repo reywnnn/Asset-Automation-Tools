@@ -13,8 +13,8 @@ from ..core.generator import (
 
 
 # Operator that bakes all geometry outputs for the selected LOD into named collections.
-class SAT_OT_BAKE(bpy.types.Operator):
-    bl_idname = "sat.bake"
+class AAT_OT_BAKE(bpy.types.Operator):
+    bl_idname = "aat.bake"
     bl_label = "Bake Asset"
     bl_description = "Bake all geometry outputs for the selected LOD into named collections"
     bl_options = {'REGISTER', 'UNDO'}
@@ -22,33 +22,33 @@ class SAT_OT_BAKE(bpy.types.Operator):
     # Returns a dynamic tooltip explaining why the button may be disabled
     @classmethod
     def description(cls, context, properties):
-        sat = context.scene.sat
-        if sat.input_mesh is None:
+        aat = context.scene.aat
+        if aat.input_mesh is None:
             return "Select an input mesh first"
-        if sat.preset == 'NONE':
+        if aat.preset == 'NONE':
             return "Select a preset first"
-        if find_generator_modifier(sat.input_mesh):
+        if find_generator_modifier(aat.input_mesh):
             return "Bake all geometry outputs for the selected LOD"
         return "Initialize the generator first"
 
     # Disables the button if no mesh is selected, preset is not selected, or preset is not applied
     @classmethod
     def poll(cls, context):
-        sat = context.scene.sat
-        if sat.input_mesh is None:
+        aat = context.scene.aat
+        if aat.input_mesh is None:
             return False
-        if sat.preset == 'NONE':
+        if aat.preset == 'NONE':
             return False
-        return find_generator_modifier(sat.input_mesh) is not None
+        return find_generator_modifier(aat.input_mesh) is not None
 
     # Executes the bake process, iterates through geometry types for the selected LOD
     def execute(self, context):
-        sat = context.scene.sat
-        obj = sat.input_mesh
-        lod = sat.lod_level
+        aat = context.scene.aat
+        obj = aat.input_mesh
+        lod = aat.lod_level
         mod = find_generator_modifier(obj)
 
-        menu_input = find_menu_switch_input(mod, sat.preset)
+        menu_input = find_menu_switch_input(mod, aat.preset)
         if menu_input is None:
             self.report({'ERROR'}, "Menu Switch input not found on preset node")
             return {'CANCELLED'}

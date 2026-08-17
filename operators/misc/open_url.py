@@ -7,8 +7,8 @@ import bpy
 
 
 # Universal operator for opening URLs in the browser with dynamic tooltips
-class SAT_OT_OPEN_URL(bpy.types.Operator):
-    bl_idname = "sat.open_url"
+class AAT_OT_OPEN_URL(bpy.types.Operator):
+    bl_idname = "aat.open_url"
     bl_label = "Open URL"
 
     url: bpy.props.StringProperty() # type: ignore
